@@ -6,10 +6,7 @@ public class GridFactory : MonoBehaviour
     [SerializeField] private BlockView _blockPrefab;
     [SerializeField] private Transform _gridRoot;
 
-    private void Start()
-    {
-        BuildGrid();
-    }
+    public Transform GridRoot => _gridRoot;
 
     // Convierte fila/columna a posición world.
     // Fila 0 = arriba
@@ -40,18 +37,16 @@ public class GridFactory : MonoBehaviour
 
     // Genera el grid completo con colores aleatorios.
     // Retorna la matriz de vistas para que el controlador la maneje.
-    public BlockView[,] BuildGrid()
+    public BlockView[,] BuildGrid(GridModel model)
     {
-        var views = new BlockView[_config.rows, _config.cols];
+        var views = new BlockView[model.Rows, model.Cols];
 
-        for (int row = 0; row < _config.rows; row++)
-        {
-            for (int col = 0; col < _config.cols; col++)
+        for (int row = 0; row < model.Rows; row++)
+            for (int col = 0; col < model.Cols; col++)
             {
-                BlockColor color = RandomColor();
+                var color = model.GetColor(row, col)!.Value;
                 views[row, col] = SpawnBlock(color, row, col);
             }
-        }
 
         return views;
     }

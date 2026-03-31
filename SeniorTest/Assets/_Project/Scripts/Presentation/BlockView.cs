@@ -21,4 +21,11 @@ public class BlockView : MonoBehaviour
         
         gameObject.name = $"Block [{gridPosition.x},{gridPosition.y}] {color}";
     }
+
+    public void SetGridPosition(Vector2Int newPosition, Vector3 worldPosition)
+    {
+        GridPosition = newPosition;
+        transform.position = worldPosition;
+        gameObject.name = $"Block [{newPosition.x},{newPosition.y}] {Color}";
+    }
 }
