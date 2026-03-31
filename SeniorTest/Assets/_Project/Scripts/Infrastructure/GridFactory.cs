@@ -1,0 +1,64 @@
+using UnityEngine;
+
+public class GridFactory : MonoBehaviour
+{
+    [SerializeField] private GameConfig _config;
+    [SerializeField] private BlockView _blockPrefab;
+    [SerializeField] private Transform _gridRoot;
+
+    private void Start()
+    {
+        BuildGrid();
+    }
+
+    // Convierte fila/columna a posición world.
+    // Fila 0 = arriba
+    public Vector3 GridToWorld(int row, int col)
+    {
+        float x = col * _config.cellWidth - (_config.cols - 1) * _config.cellWidth / 2f;
+        float y = -row * _config.cellHeight + (_config.rows - 1) * _config.cellHeight / 2f;
+
+        return _gridRoot.position + new Vector3(x, y, 0f);
+    }
+
+    // Instancia un bloque en la posición indicada.
+    public BlockView SpawnBlock(BlockColor color, int row, int col)
+    {
+        Vector3 worldPos = GridToWorld(row, col);
+
+        BlockView block = Instantiate(_blockPrefab, worldPos, Quaternion.identity, _gridRoot);
+
+        Sprite sprite = _config.blockSprites[(int)color];
+
+        block.Initialize(color, new Vector2Int(row, col), sprite);
+
+        // Orden de render Fila
+        block.GetComponent<SpriteRenderer>().sortingOrder = _config.rows - row;
+
+        return block;
+    }
+
+    // Genera el grid completo con colores aleatorios.
+    // Retorna la matriz de vistas para que el controlador la maneje.
+    public BlockView[,] BuildGrid()
+    {
+        var views = new BlockView[_config.rows, _config.cols];
+
+        for (int row = 0; row < _config.rows; row++)
+        {
+            for (int col = 0; col < _config.cols; col++)
+            {
+                BlockColor color = RandomColor();
+                views[row, col] = SpawnBlock(color, row, col);
+            }
+        }
+
+        return views;
+    }
+
+    private BlockColor RandomColor()
+    {
+        int count = System.Enum.GetValues(typeof(BlockColor)).Length;
+        return (BlockColor)Random.Range(0, count);
+    }
+}
