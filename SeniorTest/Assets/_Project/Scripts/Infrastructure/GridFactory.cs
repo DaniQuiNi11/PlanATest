@@ -19,18 +19,17 @@ public class GridFactory : MonoBehaviour
     }
 
     // Instancia un bloque en la posición indicada.
-    public BlockView SpawnBlock(BlockColor color, int row, int col)
+    public BlockView SpawnBlock(BlockColor color, int row, int col, bool animate = true)
     {
         Vector3 worldPos = GridToWorld(row, col);
-
         BlockView block = Instantiate(_blockPrefab, worldPos, Quaternion.identity, _gridRoot);
-
         Sprite sprite = _config.blockSprites[(int)color];
-
         block.Initialize(color, new Vector2Int(row, col), sprite);
-
-        // Orden de render Fila
+        
         block.GetComponent<SpriteRenderer>().sortingOrder = _config.rows - row;
+
+        if (animate)
+            block.PlaySpawnAnimation();
 
         return block;
     }
@@ -44,8 +43,9 @@ public class GridFactory : MonoBehaviour
         for (int row = 0; row < model.Rows; row++)
             for (int col = 0; col < model.Cols; col++)
             {
-                var color = model.GetColor(row, col)!.Value;
-                views[row, col] = SpawnBlock(color, row, col);
+                var color       = model.GetColor(row, col)!.Value;
+                
+                views[row, col] = SpawnBlock(color, row, col, animate: false);
             }
 
         return views;

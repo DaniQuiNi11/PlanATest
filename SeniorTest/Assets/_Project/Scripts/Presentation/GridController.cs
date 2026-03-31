@@ -112,11 +112,25 @@ public class GridController : MonoBehaviour
 
     private void HandleBlocksCollected(List<Vector2Int> cells)
     {
+        int pending = cells.Count;
+
         foreach (var cell in cells)
         {
-            if (_views[cell.x, cell.y] == null) continue;
-            Destroy(_views[cell.x, cell.y].gameObject);
+            if (_views[cell.x, cell.y] == null)
+            {
+                pending--;
+                continue;
+            }
+
+            var view = _views[cell.x, cell.y];
             _views[cell.x, cell.y] = null;
+
+            // Destroy after animation completes
+            view.PlayCollectAnimation(() =>
+            {
+                Destroy(view.gameObject);
+                pending--;
+            });
         }
     }
 
@@ -127,12 +141,16 @@ public class GridController : MonoBehaviour
             var view = _views[from.x, from.y];
             if (view == null) continue;
 
-            view.SetGridPosition(to, _factory.GridToWorld(to.x, to.y));
+            var targetPos = _factory.GridToWorld(to.x, to.y);
 
+            view.SetGridPosition(to, view.transform.position);
             view.GetComponent<SpriteRenderer>().sortingOrder = _config.rows - to.x;
 
             _views[to.x, to.y] = view;
             _views[from.x, from.y] = null;
+
+            // Animar
+            view.PlayFallAnimation(targetPos);
         }
     }
 
